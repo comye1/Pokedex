@@ -1,5 +1,6 @@
 package com.example.pokedex.pokemonlist
 
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -33,12 +34,13 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltNavGraphViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil.compose.rememberImagePainter
 import coil.request.ImageRequest
 import com.example.pokedex.R
 import com.example.pokedex.data.models.PokedexListEntry
 import com.example.pokedex.data.remote.reponses.PokemonList
 import com.example.pokedex.ui.theme.RobotoCondensed
-import com.google.accompanist.coil.CoilImage
+
 
 @Composable
 fun PokemonListScreen(
@@ -133,10 +135,10 @@ fun PokemonList(
         contentAlignment = Center,
         modifier = Modifier.fillMaxSize()
     ) {
-        if(isLoading) {
+        if (isLoading) {
             CircularProgressIndicator(color = MaterialTheme.colors.primary)
         }
-        if(loadError.isNotEmpty()){
+        if (loadError.isNotEmpty()) {
             RetrySection(error = loadError) {
                 viewModel.loadPokemonPaginated()
             }
@@ -177,26 +179,52 @@ fun PokedexEntry(
             }
     ) {
         Column {
-            CoilImage(
-                request = ImageRequest.Builder(LocalContext.current)
-                    .data(entry.imgUrl)
-                    .target {
-                        viewModel.calcDominantColor(it) { color ->
-                            dominantColor = color
-                        }
+//            Image(
+//                painter = rememberCoilPainter(
+//                    request = ImageRequest.Builder(LocalContext.current)
+//                        .data(entry.imgUrl)
+//                        .target {
+//                            viewModel.calcDominantColor(it) { color ->
+//                                dominantColor = color
+//                            }
+//                        }
+//                        .build(),
+//                    fadeIn = true,
+//                ),
+//
+//                contentDescription = entry.pokemonName,
+//                modifier = Modifier
+//                    .size(120.dp)
+//                    .align(CenterHorizontally)
+//
+//            )
+//            CoilImage(
+//                ,
+//                contentDescription = entry.pokemonName,
+//                fadeIn = true,
+//                modifier = Modifier
+//                    .size(120.dp)
+//                    .align(CenterHorizontally)
+//            ) {
+//                CircularProgressIndicator(
+//                    color = MaterialTheme.colors.primary,
+//                    modifier = Modifier.scale(0.5f)
+//                )
+//            }
+
+
+            Image(
+                painter = rememberImagePainter(
+                    data = entry.imgUrl,
+                    builder = {
+                        crossfade(true)
                     }
-                    .build(),
+                ),
                 contentDescription = entry.pokemonName,
-                fadeIn = true,
                 modifier = Modifier
                     .size(120.dp)
                     .align(CenterHorizontally)
-            ) {
-                CircularProgressIndicator(
-                    color = MaterialTheme.colors.primary,
-                    modifier = Modifier.scale(0.5f)
-                )
-            }
+            )
             Text(
                 text = entry.pokemonName,
                 fontFamily = RobotoCondensed,
