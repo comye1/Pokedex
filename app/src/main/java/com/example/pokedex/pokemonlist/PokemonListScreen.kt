@@ -118,13 +118,13 @@ fun PokemonList(
     val isLoading by remember { viewModel.isLoading }
 
     LazyColumn(contentPadding = PaddingValues(16.dp)) {
-        val itemCount = if (pokemonList.size % 2 == 0) {
+        val itemCount = if(pokemonList.size % 2 == 0) {
             pokemonList.size / 2
         } else {
             pokemonList.size / 2 + 1
         }
         items(itemCount) {
-            if (it >= itemCount - 1 && !endReached) {
+            if(it >= itemCount - 1 && !endReached) {
                 viewModel.loadPokemonPaginated()
             }
             PokedexRow(rowIndex = it, entries = pokemonList, navController = navController)
@@ -135,16 +135,15 @@ fun PokemonList(
         contentAlignment = Center,
         modifier = Modifier.fillMaxSize()
     ) {
-        if (isLoading) {
+        if(isLoading) {
             CircularProgressIndicator(color = MaterialTheme.colors.primary)
         }
-        if (loadError.isNotEmpty()) {
+        if(loadError.isNotEmpty()) {
             RetrySection(error = loadError) {
                 viewModel.loadPokemonPaginated()
             }
         }
-    }
-}
+    }}
 
 @Composable
 fun PokedexEntry(
