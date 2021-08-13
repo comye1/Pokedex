@@ -1,5 +1,6 @@
 package com.example.pokedex.pokemonlist
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
@@ -10,6 +11,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.palette.graphics.Palette
+import coil.Coil
+import coil.request.ImageRequest
+import coil.request.SuccessResult
 import com.example.pokedex.data.models.PokedexListEntry
 import com.example.pokedex.repository.PokemonRepository
 import com.example.pokedex.util.Constants.PAGE_SIZE
@@ -68,10 +72,32 @@ class PokemonListViewModel @Inject constructor(
     fun calcDominantColor(drawable: Drawable, onFinish: (Color) -> Unit) {
         val bmp = (drawable as BitmapDrawable).bitmap.copy(Bitmap.Config.ARGB_8888, true)
 
-        Palette.from(bmp).generate { palette ->
+        Palette.from(bmp).generate{ palette ->
             palette?.dominantSwatch?.rgb?.let { colorValue ->
                 onFinish(Color(colorValue))
             }
         }
     }
+
+    fun fetchColors(url: String, context: Context, onCalculated: (Color) -> Unit) {
+        viewModelScope.launch {
+            // Requesting the image using coil's ImageRequest
+            val req = ImageRequest.Builder(context)
+                .data(url)
+                .allowHardware(false)
+                .build()
+
+            val result = Coil.execute(req)
+
+            if (result is SuccessResult) {
+                // Save the drawable as a state in order to use it on the composable
+                // Converting it to bitmap and using it to calculate the palette
+                calcDominantColor(result.drawable) { color ->
+                    onCalculated(color)
+                }
+            }
+        }
+    }
+
+
 }

@@ -36,6 +36,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import coil.request.ImageRequest
+import coil.size.Scale
 import com.example.pokedex.R
 import com.example.pokedex.data.models.PokedexListEntry
 import com.example.pokedex.data.remote.reponses.PokemonList
@@ -156,10 +157,25 @@ fun PokedexEntry(
     var dominantColor by remember {
         mutableStateOf(defaultDominantColor)
     }
+    val painter = rememberImagePainter(
+        data = entry.imgUrl,
+        builder = {
+            crossfade(true)
+                .transformations(
+//                            BlurTransformation(LocalContext.current)
+                )
+                .scale(scale = Scale.FIT)
+                .build()
+        }
+    )
+
+    viewModel.fetchColors(entry.imgUrl, LocalContext.current) { color ->
+        dominantColor = color
+    }
 
     Box(
         contentAlignment = Center,
-        modifier = Modifier
+        modifier = modifier
             .shadow(5.dp, RoundedCornerShape(10.dp))
             .clip(RoundedCornerShape(10.dp))
             .aspectRatio(1f)
@@ -178,47 +194,8 @@ fun PokedexEntry(
             }
     ) {
         Column {
-//            Image(
-//                painter = rememberCoilPainter(
-//                    request = ImageRequest.Builder(LocalContext.current)
-//                        .data(entry.imgUrl)
-//                        .target {
-//                            viewModel.calcDominantColor(it) { color ->
-//                                dominantColor = color
-//                            }
-//                        }
-//                        .build(),
-//                    fadeIn = true,
-//                ),
-//
-//                contentDescription = entry.pokemonName,
-//                modifier = Modifier
-//                    .size(120.dp)
-//                    .align(CenterHorizontally)
-//
-//            )
-//            CoilImage(
-//                ,
-//                contentDescription = entry.pokemonName,
-//                fadeIn = true,
-//                modifier = Modifier
-//                    .size(120.dp)
-//                    .align(CenterHorizontally)
-//            ) {
-//                CircularProgressIndicator(
-//                    color = MaterialTheme.colors.primary,
-//                    modifier = Modifier.scale(0.5f)
-//                )
-//            }
-
-
             Image(
-                painter = rememberImagePainter(
-                    data = entry.imgUrl,
-                    builder = {
-                        crossfade(true)
-                    }
-                ),
+                painter = painter,
                 contentDescription = entry.pokemonName,
                 modifier = Modifier
                     .size(120.dp)
@@ -256,7 +233,7 @@ fun PokedexRow(
                     modifier = Modifier.weight(1f)
                 )
             } else {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.weight(1f))
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
