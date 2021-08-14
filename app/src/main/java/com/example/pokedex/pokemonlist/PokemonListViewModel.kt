@@ -41,11 +41,11 @@ class PokemonListViewModel @Inject constructor(
 
     fun  loadPokemonPaginated() {
         viewModelScope.launch {
-            isLoading.value = true
-            val result = repository.getPokemonList(PAGE_SIZE, curPage * PAGE_SIZE)
+            isLoading.value = true // 로딩중
+            val result = repository.getPokemonList(PAGE_SIZE, curPage * PAGE_SIZE) // 20개씩 로드 (현재 페이지의 20개)
             when (result) {
                 is Resource.Success -> {
-                    endReached.value = curPage * PAGE_SIZE >= result.data!!.count
+                    endReached.value = curPage * PAGE_SIZE >= result.data!!.count // offset이 결과 count보다 같거나 클 때?
                     val pokedexEntries = result.data.results.mapIndexed{ index, entry ->
                         val number = if(entry.url.endsWith("/")) {
                             entry.url.dropLast(1).takeLastWhile { it.isDigit() }
@@ -53,7 +53,11 @@ class PokemonListViewModel @Inject constructor(
                             entry.url.takeLastWhile { it.isDigit() }
                         }
                         val url = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${number}.png"
-                        PokedexListEntry(entry.name.capitalize(Locale.ROOT), url, number.toInt())
+                        PokedexListEntry(entry.name.replaceFirstChar {
+                            if (it.isLowerCase()) it.titlecase(
+                                Locale.ROOT
+                            ) else it.toString()
+                        }, url, number.toInt())
                     }
                     curPage++
 
